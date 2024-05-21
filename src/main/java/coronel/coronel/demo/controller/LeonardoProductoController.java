@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.util.List;
 
@@ -14,19 +16,25 @@ import java.util.List;
 @RequestMapping("/api/productos")
 public class LeonardoProductoController {
 
-
-
     @Autowired
     private LeonardoProductoService productoService;
 
     @GetMapping
-    @ApiOperation(value = "Obtener todos los productos")
+    @Operation(summary = "Obtener todos los productos")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de productos encontrada"),
+            @ApiResponse(responseCode = "404", description = "No se encontraron productos")
+    })
     public List<LeonardoProductoEntity> getAllProductos() {
         return productoService.findAllProductos();
     }
 
     @GetMapping("/{id}")
-    @ApiOperation(value = "Obtener un producto por su ID")
+    @Operation(summary = "Obtener un producto por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Producto encontrado"),
+            @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+    })
     public ResponseEntity<LeonardoProductoEntity> getProductoById(@PathVariable int id) {
         return productoService.findProductoById(id)
                 .map(ResponseEntity::ok)
@@ -34,13 +42,21 @@ public class LeonardoProductoController {
     }
 
     @PostMapping
-    @ApiOperation(value = "Crear un nuevo producto")
+    @Operation(summary = "Crear un nuevo producto")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Producto creado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Solicitud incorrecta")
+    })
     public ResponseEntity<LeonardoProductoEntity> createProducto(@RequestBody LeonardoProductoEntity producto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productoService.saveProducto(producto));
     }
 
     @PutMapping("/{id}")
-    @ApiOperation(value = "Actualizar un producto existente")
+    @Operation(summary = "Actualizar un producto existente")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Producto actualizado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+    })
     public ResponseEntity<LeonardoProductoEntity> updateProducto(@PathVariable int id, @RequestBody LeonardoProductoEntity producto) {
         if (!productoService.findProductoById(id).isPresent()) {
             return ResponseEntity.notFound().build();
@@ -50,7 +66,11 @@ public class LeonardoProductoController {
     }
 
     @DeleteMapping("/{id}")
-    @ApiOperation(value = "Eliminar un producto por su ID")
+    @Operation(summary = "Eliminar un producto por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Producto eliminado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Producto no encontrado")
+    })
     public ResponseEntity<Void> deleteProducto(@PathVariable int id) {
         if (!productoService.findProductoById(id).isPresent()) {
             return ResponseEntity.notFound().build();
